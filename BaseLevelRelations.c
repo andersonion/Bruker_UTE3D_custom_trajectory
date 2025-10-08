@@ -35,6 +35,10 @@ fclose(dfp); \
 #define PRINTARRAY(file, array, nelem) ;
 #endif
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include "method.h"
 
 void SetBaseLevelParam()
@@ -48,6 +52,33 @@ void SetBaseLevelParam()
   SetFrequencyParameters();
   
   SetGradientParameters();
+  
+  if (PVM_UseExternalDirs == Yes && PVM_DirFile[0] != '\0') {
+      double* tmp = NULL; int n = 0;
+      int rc = LoadDirFile_(PVM_DirFile, &tmp, &n);
+      if (rc == 0 && n > 0) {
+          PARX_change_dims("PVM_Dirs", n, 3);
+          for (int i = 0; i < n; i++) {
+              PVM_Dirs[i][0] = tmp[3*i+0];
+              PVM_Dirs[i][1] = tmp[3*i+1];
+              PVM_Dirs[i][2] = tmp[3*i+2];
+          }
+          PVM_DirsCount = n;
+          DB_MSG(("Loaded %d external directions from %s", n, PVM_DirFile));
+      } else {
+          /* graceful fallback */
+          PVM_UseExternalDirs = No;
+          PVM_DirsCount = 0;
+          PARX_change_dims("PVM_Dirs", 0, 3);
+          DB_MSG(("External dir load FAILED; using built-in projections"));
+      }
+      if (tmp) free(tmp);
+  } else {
+      /* not using externals; ensure empty */
+      PVM_DirsCount = 0;
+      PARX_change_dims("PVM_Dirs", 0, 3);
+  }
+  
   
   SetPpgParameters();
 
@@ -394,6 +425,26 @@ void SetPpgParameters(void)
 	    GradAmpS,
 	    1,1,1);
 
+  if (PVM_UseExternalDirs == Yes && PVM_DirsCount > 0) {
+      int use = (PVM_DirsCount < NPro) ? PVM_DirsCount : NPro;
+      if (PVM_DirsCount != NPro) {
+          DB_MSG(("NOTE: PVM_DirsCount (%d) != NPro (%d); using first %d spokes",
+                  PVM_DirsCount, NPro, use));
+      }
+      for (int i = 0; i < use; i++) {
+          /* Directions are in object R/P/S coords (Read, Phase, Slice) */
+          GradAmpR[i] = PVM_Dirs[i][0];
+          GradAmpP[i] = PVM_Dirs[i][1];
+          GradAmpS[i] = PVM_Dirs[i][2];
+      }
+      /* (optional) zero out any remaining slots if file shorter than NPro */
+      for (int i = use; i < NPro; i++) {
+          GradAmpR[i] = 1.0;  /* or leave vendor’s values; your call */
+          GradAmpP[i] = 0.0;
+          GradAmpS[i] = 0.0;
+      }
+      DB_MSG(("External directions applied to GradAmpR/P/S"));
+  }
 
   DB_MSG(("<--SetPpgParameters"));
 }
@@ -577,5 +628,38 @@ void PrintTimingInfo(void)
   
 }
 
+static int LoadDirFile_(const char* fname, double** buf_out, int* rows_out) {
+    FILE* f = fopen(fname, "r");
+    if (!f) return -1;
 
+    int cap = 4096, n = 0;
+    double* buf = (double*) malloc(sizeof(double) * cap * 3);
+    if (!buf) { fclose(f); return -2; }
 
+    while (!feof(f)) {
+        double dx, dy, dz;
+        if (3 == fscanf(f, "%lf %lf %lf", &dx, &dy, &dz)) {
+            if (n >= cap) {
+                cap *= 2;
+                double* tmp = (double*) realloc(buf, sizeof(double) * cap * 3);
+                if (!tmp) { free(buf); fclose(f); return -3; }
+                buf = tmp;
+            }
+            /* normalize to be safe */
+            double m = sqrt(dx*dx + dy*dy + dz*dz);
+            if (m > 0.0) { dx/=m; dy/=m; dz/=m; }
+            buf[3*n+0] = dx;
+            buf[3*n+1] = dy;
+            buf[3*n+2] = dz;
+            n++;
+        } else {
+            /* consume non-numeric / end */
+            break;
+        }
+    }
+    fclose(f);
+
+    if (n <= 0) { free(buf); return -4; }
+    *buf_out = buf; *rows_out = n;
+    return 0;
+}

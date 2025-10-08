@@ -148,14 +148,14 @@ double parameter
 
 double parameter SpoilDur;
 
+/* --- user-facing --- */
+YesNo  PVM_UseExternalDirs;        /* No = built-in UTE, Yes = use file */
+char   PVM_DirFile[256];           /* path or filename in scan folder   */
 
-/***** User-facing controls *****/
-YesNo  PVM_UseExternalDirs;     /* toggle: No = built-in UTE3D, Yes = use file */
-char   PVM_DirFile[256];        /* path to whitespace txt in scan folder */
-
-/***** Internal storage *****/
-int    PVM_DirsCount;           /* number of spokes in file            */
-float  PVM_Dirs[][3];           /* [N x 3] unit vectors (dx,dy,dz)     */
+/* --- internal storage --- */
+int    PVM_DirsCount;              /* number of spokes in file          */
+/* dynamic 2D array; size set at runtime via PARX_change_dims() */
+double PVM_Dirs[1][3];             /* [N x 3] unit vectors (dx,dy,dz)   */
 
 
 /****************************************************************/
