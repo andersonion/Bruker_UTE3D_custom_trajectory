@@ -426,24 +426,58 @@ void SetPpgParameters(void)
 	    1,1,1);
 
   if (PVM_UseExternalDirs == Yes && PVM_DirsCount > 0) {
+
+      /* How many spokes to apply (min of file count and NPro) */
       int use = (PVM_DirsCount < NPro) ? PVM_DirsCount : NPro;
-      if (PVM_DirsCount != NPro) {
-          DB_MSG(("NOTE: PVM_DirsCount (%d) != NPro (%d); using first %d spokes",
-                  PVM_DirsCount, NPro, use));
+
+      /* Orientation matrix: maps R/P/S -> scanner XYZ */
+      const double (*M)[3] = PVM_SPackArrGradOrient[0];
+
+      /* Precompute transpose if we need XYZ->RPS */
+      double MT[3][3];
+      if (PVM_DirsAreScannerXYZ == Yes) {
+          /* transpose: MT = Mᵀ */
+          for (int r = 0; r < 3; r++)
+              for (int c = 0; c < 3; c++)
+                  MT[r][c] = M[c][r];
       }
+
       for (int i = 0; i < use; i++) {
-          /* Directions are in object R/P/S coords (Read, Phase, Slice) */
-          GradAmpR[i] = PVM_Dirs[i][0];
-          GradAmpP[i] = PVM_Dirs[i][1];
-          GradAmpS[i] = PVM_Dirs[i][2];
+
+          double dx = PVM_Dirs[i][0];
+          double dy = PVM_Dirs[i][1];
+          double dz = PVM_Dirs[i][2];
+
+          double r=dx, p=dy, s=dz; /* assume already R/P/S */
+
+          if (PVM_DirsAreScannerXYZ == Yes) {
+              /* convert scanner XYZ -> R/P/S via Mᵀ */
+              r = MT[0][0]*dx + MT[0][1]*dy + MT[0][2]*dz;
+              p = MT[1][0]*dx + MT[1][1]*dy + MT[1][2]*dz;
+              s = MT[2][0]*dx + MT[2][1]*dy + MT[2][2]*dz;
+          }
+
+          /* Normalize for safety (unit vector) */
+          double m = sqrt(r*r + p*p + s*s);
+          if (m > 0.0) { r/=m; p/=m; s/=m; }
+
+          /* These arrays control spoke orientation for the PPG */
+          GradAmpR[i] = r;
+          GradAmpP[i] = p;
+          GradAmpS[i] = s;
       }
-      /* (optional) zero out any remaining slots if file shorter than NPro */
+
+      /* Optional: handle leftover slots if file shorter than NPro */
       for (int i = use; i < NPro; i++) {
-          GradAmpR[i] = 1.0;  /* or leave vendor’s values; your call */
+          GradAmpR[i] = 1.0;  /* or leave vendor defaults */
           GradAmpP[i] = 0.0;
           GradAmpS[i] = 0.0;
       }
-      DB_MSG(("External directions applied to GradAmpR/P/S"));
+
+      DB_MSG(("Applied %d external directions (%s frame)",
+              use,
+              (PVM_DirsAreScannerXYZ==Yes ? "scanner XYZ -> RPS" : "RPS direct")));
+
   }
 
   DB_MSG(("<--SetPpgParameters"));

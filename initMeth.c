@@ -78,6 +78,7 @@ void initMeth()
   PVM_UseExternalDirs = No;
   strcpy(PVM_DirFile, "");
   PVM_DirsCount = 0;
+  PVM_DirsAreScannerXYZ = No;      /* default: file is already R/P/S */
   PARX_change_dims("PVM_Dirs", 0, 3);
 
   /* not a csi experiment */

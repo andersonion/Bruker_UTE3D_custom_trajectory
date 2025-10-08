@@ -157,6 +157,9 @@ int    PVM_DirsCount;              /* number of spokes in file          */
 /* dynamic 2D array; size set at runtime via PARX_change_dims() */
 double PVM_Dirs[1][3];             /* [N x 3] unit vectors (dx,dy,dz)   */
 
+/* Are directions in scanner XYZ? (otherwise assume R/P/S) */
+YesNo PVM_DirsAreScannerXYZ;
+
 
 /****************************************************************/
 /*	E N D   O F   F I L E					*/
