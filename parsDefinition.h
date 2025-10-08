@@ -148,6 +148,16 @@ double parameter
 
 double parameter SpoilDur;
 
+
+/***** User-facing controls *****/
+YesNo  PVM_UseExternalDirs;     /* toggle: No = built-in UTE3D, Yes = use file */
+char   PVM_DirFile[256];        /* path to whitespace txt in scan folder */
+
+/***** Internal storage *****/
+int    PVM_DirsCount;           /* number of spokes in file            */
+float  PVM_Dirs[][3];           /* [N x 3] unit vectors (dx,dy,dz)     */
+
+
 /****************************************************************/
 /*	E N D   O F   F I L E					*/
 /****************************************************************/
