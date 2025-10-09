@@ -26,12 +26,10 @@ static const char resid[] = "$Id: initMeth.c,v 1.31 2013/05/22 10:55:23 sako Exp
 
 static void compute_default_search_root_init_(char* out, size_t n)
 {
-    /* resolve to the method's src directory at compile time */
-    const char* thisfile = __FILE__;                 /* e.g., .../methods/src/qialUTE3D/initMeth.c */
+    const char* thisfile = __FILE__;                 /* …/src/qialUTE3D/initMeth.c */
     char tmp[512]; strncpy(tmp, thisfile, sizeof(tmp)-1); tmp[sizeof(tmp)-1]='\0';
     char* slash = strrchr(tmp, '/'); if (slash) *slash = '\0';  /* strip filename */
-    /* tmp now = .../methods/src/qialUTE3D */
-    snprintf(out, n, "%s/dirs", tmp);                /* default to src/dirs */
+    snprintf(out, n, "%s/dirs", tmp);                /* -> …/src/qialUTE3D/dirs */
 }
 
 
@@ -88,20 +86,17 @@ void initMeth()
     PVM_UseExternalDirs   = No;
     PVM_DirsAreScannerXYZ = No;
 
-    /* set Search Folder immediately (no hardcoded absolute path) */
+
     compute_default_search_root_init_(PVM_DirSearchRoot, sizeof(PVM_DirSearchRoot));
 
-    /* seed list & selection */
     PARX_change_dims("PVM_DirFileList", 1, 256);
     strcpy(PVM_DirFileList[0], "<none>");
     PVM_DirFileIdx = 0;
     strcpy(PVM_DirFile, PVM_DirFileList[0]);
 
-    /* internal directions array must be >= 1x3 */
     PARX_change_dims("PVM_Dirs", 1, 3);
     PVM_Dirs[0][0]=1.0; PVM_Dirs[0][1]=0.0; PVM_Dirs[0][2]=0.0;
     PVM_DirsCount = 0;
-
 
   /* not a csi experiment */
   PTB_SetSpectrocopyDims( 0, 0 );

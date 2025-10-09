@@ -110,6 +110,8 @@ void SetBaseLevelParam()
   DB_MSG(("-->SetBaseLevelParam"));
 
 
+	ParxRelsParRelations("PVM_DirFileIdx", Yes);
+
   SetBasicParameters();
     
   SetFrequencyParameters();
@@ -125,18 +127,16 @@ void SetBaseLevelParam()
   }
 
   /* refresh list and sync selection text */
-	int n_list = refresh_dir_list_(PVM_DirSearchRoot);
-	/* clamp index and sync Selected File text */
-	if (n_list <= 0) {
-		PVM_DirFileIdx = 0;
-		strcpy(PVM_DirFile, "<none>");
-	} else {
-		if (PVM_DirFileIdx < 0)           PVM_DirFileIdx = 0;
-		if (PVM_DirFileIdx >= n_list)     PVM_DirFileIdx = n_list - 1;
-		strcpy(PVM_DirFile, PVM_DirFileList[PVM_DirFileIdx]);
-	}
+	if (n_list <= 0) { PVM_DirFileIdx = 0; strcpy(PVM_DirFile, "<none>"); }
+	else {
+    	if (PVM_DirFileIdx < 0) PVM_DirFileIdx = 0;
+    	if (PVM_DirFileIdx >= n_list) PVM_DirFileIdx = n_list - 1;
+    	strcpy(PVM_DirFile, PVM_DirFileList[PVM_DirFileIdx]);
+	}	
 
-  DB_MSG(("External dir list: %d entries from %s", n_list, PVM_DirSearchRoot));
+  DB_MSG(("External dir list: %d entries from %s", n_list, PVM_DirSearchRoot)); 
+  DB_MSG(("SearchRoot: %s", PVM_DirSearchRoot));
+  DB_MSG(("List entries: %d; idx=%d; sel=%s", n_list, PVM_DirFileIdx, PVM_DirFile));
 
   /* load selected file if enabled & valid */
 	if (PVM_UseExternalDirs == Yes &&
