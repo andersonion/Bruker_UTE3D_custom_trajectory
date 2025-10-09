@@ -148,12 +148,12 @@ double parameter
 
 double parameter SpoilDur;
 
-parameter YesNo  PVM_UseExternalDirs;
-parameter YesNo  PVM_DirsAreScannerXYZ;
-parameter char   PVM_DirFile[256];
-parameter int    PVM_DirsCount;
+YesNo parameter PVM_UseExternalDirs;
+YesNo parameter  PVM_DirsAreScannerXYZ;
+char parameter PVM_DirFile[256];
+int  parameter  PVM_DirsCount;
 /* IMPORTANT: default dims must be nonzero */
-parameter double PVM_Dirs[1][3];
+double parameter PVM_Dirs[1][3];
 
 /****************************************************************/
 /*	E N D   O F   F I L E					*/
