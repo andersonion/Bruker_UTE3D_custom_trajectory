@@ -108,7 +108,7 @@ Description: Layout of routine parameter editor for method UTE3D.
 			<parameter name="PVM_UseExternalDirs"      displayName="Use External Directions"/>
 			<parameter name="PVM_DirFile"              displayName="Direction File (txt)"/>
 			<parameter name="PVM_DirsAreScannerXYZ"    displayName="File in Scanner XYZ"/>
-			<parameter name="PVM_DirsCount"            displayName="# Directions Loaded" readonly="true"/>
+			<parameter name="PVM_DirsCount"            displayName="# Directions Loaded"/>
 		  </column>
 		  <column>
 			<textLine text="Format: one line per spoke: dx dy dz (unit vector)."/>
