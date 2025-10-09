@@ -3,6 +3,7 @@ void initMeth(void);
 /* /opt/PV6.0.1/prog/curdir/qial/ParaVision/methods/src/qialUTE3D/loadMeth.c */
 void loadMeth(const char *);
 /* /opt/PV6.0.1/prog/curdir/qial/ParaVision/methods/src/qialUTE3D/parsRelations.c */
+void PVM_DirFileIdxRel(void);
 void ExcPulse1EnumRel(void);
 void ExcPulse1AmplRel(void);
 void HandleRFPulseAmplitude(void);
