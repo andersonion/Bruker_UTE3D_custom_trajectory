@@ -105,20 +105,17 @@ Description: Layout of routine parameter editor for method UTE3D.
 		<!-- ===== External Trajectory ===== -->
 		<parameterCard displayName="External Trajectory">
 		  <column>
-			<parameter name="PVM_UseExternalDirs"      displayName="Use External Directions"/>
-			<!-- combo bound to PVM_DirFileList -->
-			<parameter name="PVM_DirFile"
-					   displayName="Direction File"
-					   widget="comboBox"
-					   selectionListParameterName="PVM_DirFileList"/>
-			<parameter name="PVM_DirsAreScannerXYZ"    displayName="File in Scanner XYZ"/>
-			<!-- show the auto-detected src/dirs (read-only ok) -->
-			<parameter name="PVM_DirSearchRoot"        displayName="Search Folder" readonly="true"/>
-			<parameter name="PVM_DirsCount"            displayName="# Directions Loaded" readonly="true"/>
+			<parameter name="PVM_UseExternalDirs"   displayName="Use External Directions"/>
+			<parameter name="PVM_DirFile"           displayName="Direction File" widget="combobox">
+			  <selectionList parameterName="PVM_DirFileList"/>
+			</parameter>
+			<parameter name="PVM_DirsAreScannerXYZ" displayName="File in Scanner XYZ"/>
+			<parameter name="PVM_DirSearchRoot"     displayName="Search Folder" readonly="true"/>
+			<parameter name="PVM_DirsCount"         displayName="# Directions Loaded" readonly="true"/>
 		  </column>
 		  <column>
 			<textLine text="Folder: src/dirs next to this method (auto)."/>
-			<textLine text="Combo shows *.txt in that folder."/>
+			<textLine text="Combobox lists *.txt in that folder."/>
 			<textLine text="Each line: dx dy dz (unit vector)."/>
 		  </column>
 		</parameterCard>
