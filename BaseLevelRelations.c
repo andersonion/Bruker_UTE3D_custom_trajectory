@@ -127,6 +127,7 @@ void SetBaseLevelParam()
   }
 
   /* refresh list and sync selection text */
+	int n_list = refresh_dir_list_(PVM_DirSearchRoot);
 	if (n_list <= 0) { PVM_DirFileIdx = 0; strcpy(PVM_DirFile, "<none>"); }
 	else {
     	if (PVM_DirFileIdx < 0) PVM_DirFileIdx = 0;
