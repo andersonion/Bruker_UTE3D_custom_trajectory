@@ -151,6 +151,7 @@ double parameter SpoilDur;
 YesNo parameter PVM_UseExternalDirs;
 YesNo parameter  PVM_DirsAreScannerXYZ;
 char parameter PVM_DirFile[256];
+int    parameter PVM_DirFileIdx;            /* 0-based index into list */
 char   parameter PVM_DirFileList[1][256];    /* dropdown list (>=1 row always) */
 char   parameter PVM_DirSearchRoot[256];     /* folder to scan for *.txt */
 int  parameter  PVM_DirsCount;
