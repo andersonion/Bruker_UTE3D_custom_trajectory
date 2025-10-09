@@ -40,6 +40,7 @@ fclose(dfp); \
 #include <string.h>
 #include <math.h>
 #include "method.h"
+static int LoadDirFile_(const char* fname, double** buf_out, int* rows_out);
 
 void SetBaseLevelParam()
 {
@@ -431,7 +432,8 @@ void SetPpgParameters(void)
       int use = (PVM_DirsCount < NPro) ? PVM_DirsCount : NPro;
 
       /* Orientation matrix: maps R/P/S -> scanner XYZ */
-      const double (*M)[3] = PVM_SPackArrGradOrient[0];
+      /*const double (*M)[3] = PVM_SPackArrGradOrient[0];*/
+	  const double (*M)[3] = (const double (*)[3]) PVM_SPackArrGradOrient[0];
 
       /* Precompute transpose if we need XYZ->RPS */
       double MT[3][3];
