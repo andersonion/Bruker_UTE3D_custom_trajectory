@@ -15,9 +15,9 @@
 static const char resid[] = "$Id: BaseLevelRelations.c,v 1.24 2013/04/22 13:29:10 sako Exp $ (C) 2009 Bruker BioSpin MRI GmbH";
 
 
-#define DEBUG		0
-#define DB_MODULE	0
-#define DB_LINE_NR	0
+#define DEBUG		1
+#define DB_MODULE	1
+#define DB_LINE_NR	1
 
 
 #if DEBUG
