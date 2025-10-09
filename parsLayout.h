@@ -56,6 +56,20 @@ attributes
 
 parclass
 {
+  PVM_UseExternalDirs;
+  PVM_DirFile;
+  PVM_DirsAreScannerXYZ;
+  PVM_DirsCount;           /* optional: just to see how many were loaded */
+}
+attributes
+{
+  display_name "External Trajectory";
+} External_Trajectory;
+
+
+
+parclass
+{
   DummyScans_Parameters;
   PVM_FreqDriftYN;
   PVM_TriggerModule;
@@ -90,8 +104,10 @@ parclass
   ImageGeometry;
   Preparation;
   TrajParameters;
+  External_Trajectory;
   MapShim;
 } MethodClass;
+
 
 parclass
 {
