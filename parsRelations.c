@@ -21,18 +21,17 @@ static const char resid[] = "$Id: parsRelations.c,v 1.20 2013/06/14 14:02:41 sak
 #define DB_LINE_NR	0
 
 #include "method.h"
+void PVM_DirFileIdxRel(void)
+{
+    int n = PARX_get_dim("PVM_DirFileList", 1);  /* rows in list */
+    if (n < 1) n = 1;
 
+    if (PVM_DirFileIdx < 0)       PVM_DirFileIdx = 0;
+    if (PVM_DirFileIdx >= n)      PVM_DirFileIdx = n - 1;
 
-compute_default_search_root_init_(PVM_DirSearchRoot, sizeof(PVM_DirSearchRoot));
+    strcpy(PVM_DirFile, PVM_DirFileList[PVM_DirFileIdx]);
+}
 
-PARX_change_dims("PVM_DirFileList", 1, 256);
-strcpy(PVM_DirFileList[0], "<none>");
-PVM_DirFileIdx = 0;
-strcpy(PVM_DirFile, PVM_DirFileList[0]);
-
-PARX_change_dims("PVM_Dirs", 1, 3);
-PVM_Dirs[0][0]=1.0; PVM_Dirs[0][1]=0.0; PVM_Dirs[0][2]=0.0;
-PVM_DirsCount = 0;
 
 /*-----------------------------------------------
  * Range checking and default relation routines

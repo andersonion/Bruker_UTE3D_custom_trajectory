@@ -32,7 +32,6 @@ static void compute_default_search_root_init_(char* out, size_t n)
     snprintf(out, n, "%s/dirs", tmp);                /* -> …/src/qialUTE3D/dirs */
 }
 
-
 void initMeth()
 /*:=MPE=:=======================================================*/
 {
