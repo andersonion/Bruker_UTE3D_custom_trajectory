@@ -14,10 +14,12 @@
 
 static const char resid[] = "$Id: BaseLevelRelations.c,v 1.24 2013/04/22 13:29:10 sako Exp $ (C) 2009 Bruker BioSpin MRI GmbH";
 
-
-#define DEBUG		1
-#define DB_MODULE	1
-#define DB_LINE_NR	1
+#undef  DEBUG
+#undef  DB_MODULE
+#undef  DB_LINE_NR
+#define DEBUG      1   /* enable DB_MSG and PRINTARRAY in this file */
+#define DB_MODULE  1   /* include module name in DB_MSG            */
+#define DB_LINE_NR 1   /* include line numbers in DB_MSG           */
 
 
 #if DEBUG

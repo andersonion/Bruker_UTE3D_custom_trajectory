@@ -16,11 +16,14 @@
 
 static const char resid[] = "$Id: parsRelations.c,v 1.20 2013/06/14 14:02:41 sako Exp $ (C) 2009 Bruker BioSpin MRI GmbH";
 
-#define DEBUG		1
-#define DB_MODULE	1
-#define DB_LINE_NR	1
-
+#undef  DEBUG
+#undef  DB_MODULE
+#undef  DB_LINE_NR
+#define DEBUG      1   /* enable DB_MSG and PRINTARRAY in this file */
+#define DB_MODULE  1   /* include module name in DB_MSG            */
+#define DB_LINE_NR 1   /* include line numbers in DB_MSG           */
 #include "method.h"
+
 void PVM_DirFileIdxRel(void)
 {
     int n = PARX_get_dim("PVM_DirFileList", 1);  /* rows in list */

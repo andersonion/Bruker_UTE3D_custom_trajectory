@@ -15,13 +15,12 @@
 
 static const char resid[] = "$Id: initMeth.c,v 1.31 2013/05/22 10:55:23 sako Exp $ (C) 2009 Bruker BioSpin MRI GmbH";
 
-#define DEBUG		1
-#define DB_MODULE       1
-#define DB_LINE_NR	1
-
-
-
-
+#undef  DEBUG
+#undef  DB_MODULE
+#undef  DB_LINE_NR
+#define DEBUG      1   /* enable DB_MSG and PRINTARRAY in this file */
+#define DB_MODULE  1   /* include module name in DB_MSG            */
+#define DB_LINE_NR 1   /* include line numbers in DB_MSG           */
 #include "method.h"
 
 static void compute_default_search_root_init_(char* out, size_t n)
