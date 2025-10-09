@@ -102,19 +102,21 @@ Description: Layout of routine parameter editor for method UTE3D.
                 <parameter name="GradSync"/>
             </column>
         </parameterCard>
-        <parameterCard displayName="External Trajectory">
-            <column>
-                <parameter name="PVM_UseExternalDirs"       displayName="Use External Directions"/>
-                <parameter name="PVM_DirFile"               displayName="Direction File (txt)"/>
-                <parameter name="PVM_DirsAreScannerXYZ"     displayName="File in Scanner XYZ"/>
-                <parameter name="PVM_DirsCount"             displayName="# Directions Loaded"/>
-            </column>
-            <column>
-                <textLine text="Format: one line per spoke → dx dy dz (unit vector)."/>
-                <textLine text="If file is in scanner XYZ, set 'File in Scanner XYZ' = Yes."/>
-                <textLine text="Place the file in the scan folder and enter just the filename."/>
-            </column>
-        </parameterCard>
+        <!-- ===== External Trajectory ===== -->
+		<parameterCard displayName="External Trajectory">
+		  <column>
+			<parameter name="PVM_UseExternalDirs"      displayName="Use External Directions"/>
+			<parameter name="PVM_DirFile"              displayName="Direction File (txt)"/>
+			<parameter name="PVM_DirsAreScannerXYZ"    displayName="File in Scanner XYZ"/>
+			<parameter name="PVM_DirsCount"            displayName="# Directions Loaded" readonly="true"/>
+		  </column>
+		  <column>
+			<textLine text="Format: one line per spoke: dx dy dz (unit vector)."/>
+			<textLine text="If directions are in scanner XYZ, set option to Yes."/>
+			<textLine text="Place file in scan folder; enter just the filename."/>
+		  </column>
+		</parameterCard>
+
         <xi:include href="file:///XML_INCLUDE_DIR/Trajectory.xml"/>
         <xi:include href="file:///XML_INCLUDE_DIR/Freq1.xml"/>
         <xi:include href="file:///XML_INCLUDE_DIR/Tx1.xml"/>  
