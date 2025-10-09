@@ -54,31 +54,38 @@ void SetBaseLevelParam()
   
   SetGradientParameters();
   
-  if (PVM_UseExternalDirs == Yes && PVM_DirFile[0] != '\0') {
-      double* tmp = NULL; int n = 0;
-      int rc = LoadDirFile_(PVM_DirFile, &tmp, &n);
-      if (rc == 0 && n > 0) {
-          PARX_change_dims("PVM_Dirs", n, 3);
-          for (int i = 0; i < n; i++) {
-              PVM_Dirs[i][0] = tmp[3*i+0];
-              PVM_Dirs[i][1] = tmp[3*i+1];
-              PVM_Dirs[i][2] = tmp[3*i+2];
-          }
-          PVM_DirsCount = n;
-          DB_MSG(("Loaded %d external directions from %s", n, PVM_DirFile));
-      } else {
-          /* graceful fallback */
-          PVM_UseExternalDirs = No;
-          PVM_DirsCount = 0;
-          PARX_change_dims("PVM_Dirs", 0, 3);
-          DB_MSG(("External dir load FAILED; using built-in projections"));
-      }
-      if (tmp) free(tmp);
-  } else {
-      /* not using externals; ensure empty */
-      PVM_DirsCount = 0;
-      PARX_change_dims("PVM_Dirs", 0, 3);
-  }
+	/* load external directions BEFORE SetPpgParameters() */
+	if (PVM_UseExternalDirs == Yes && PVM_DirFile[0] != '\0') {
+	
+		double* tmp = NULL; int n = 0;
+		int rc = LoadDirFile_(PVM_DirFile, &tmp, &n);
+	
+		if (rc == 0 && n > 0) {
+			PARX_change_dims("PVM_Dirs", n, 3);
+			for (int i = 0; i < n; i++) {
+				PVM_Dirs[i][0] = tmp[3*i+0];
+				PVM_Dirs[i][1] = tmp[3*i+1];
+				PVM_Dirs[i][2] = tmp[3*i+2];
+			}
+			PVM_DirsCount = n;
+			DB_MSG(("Loaded %d external directions from %s", n, PVM_DirFile));
+		} else {
+			/* fallback: keep dims at 1×3; do NOT set to 0×3 */
+			PARX_change_dims("PVM_Dirs", 1, 3);
+			PVM_Dirs[0][0] = 1.0; PVM_Dirs[0][1] = 0.0; PVM_Dirs[0][2] = 0.0;
+			PVM_DirsCount  = 0;
+			PVM_UseExternalDirs = No;
+			DB_MSG(("External dir load FAILED; using built-in projections"));
+		}
+		if (tmp) free(tmp);
+	
+	} else {
+		/* not using externals: keep 1×3 placeholder; count=0 */
+		PARX_change_dims("PVM_Dirs", 1, 3);
+		PVM_Dirs[0][0] = 1.0; PVM_Dirs[0][1] = 0.0; PVM_Dirs[0][2] = 0.0;
+		PVM_DirsCount  = 0;
+	}
+
   
   
   SetPpgParameters();
@@ -420,67 +427,44 @@ void SetPpgParameters(void)
   PARX_change_dims("GradAmpR",NPro);
   PARX_change_dims("GradAmpP",NPro);
   PARX_change_dims("GradAmpS",NPro);
+	
+	/* vendor default projection set (fallback) */
+	SetProj3D(GradAmpR, GradAmpP, GradAmpS, 1, 1, 1);
+	
+	/* override only if we actually loaded something */
+	if (PVM_UseExternalDirs == Yes && PVM_DirsCount > 0) {
+	
+		int use = (PVM_DirsCount < NPro) ? PVM_DirsCount : NPro;
+	
+		/* R/P/S -> XYZ matrix (3×3) from current pack 0; cast to row[3] */
+		const double (*M)[3] = (const double (*)[3]) PVM_SPackArrGradOrient[0];
+	
+		double MT[3][3];
+		if (PVM_DirsAreScannerXYZ == Yes) {
+			for (int r=0;r<3;r++) for (int c=0;c<3;c++) MT[r][c] = M[c][r]; /* M^T */
+		}
+	
+		for (int i = 0; i < use; i++) {
+			double dx = PVM_Dirs[i][0], dy = PVM_Dirs[i][1], dz = PVM_Dirs[i][2];
+			double r=dx, p=dy, s=dz;
+			if (PVM_DirsAreScannerXYZ == Yes) {
+				r = MT[0][0]*dx + MT[0][1]*dy + MT[0][2]*dz;
+				p = MT[1][0]*dx + MT[1][1]*dy + MT[1][2]*dz;
+				s = MT[2][0]*dx + MT[2][1]*dy + MT[2][2]*dz;
+			}
+			double m = sqrt(r*r+p*p+s*s); if (m>0.0) { r/=m; p/=m; s/=m; }
+			GradAmpR[i] = r;  GradAmpP[i] = p;  GradAmpS[i] = s;
+		}
+	
+		/* optional: handle tail if file shorter than NPro */
+		for (int i = use; i < NPro; i++) {
+			GradAmpR[i] = 1.0; GradAmpP[i] = 0.0; GradAmpS[i] = 0.0;
+		}
+	
+		DB_MSG(("Applied %d external directions (%s frame)",
+				use, (PVM_DirsAreScannerXYZ==Yes ? "XYZ->RPS" : "RPS direct")));
+	}
 
-  SetProj3D(GradAmpR,
-	    GradAmpP,
-	    GradAmpS,
-	    1,1,1);
-
-  if (PVM_UseExternalDirs == Yes && PVM_DirsCount > 0) {
-
-      /* How many spokes to apply (min of file count and NPro) */
-      int use = (PVM_DirsCount < NPro) ? PVM_DirsCount : NPro;
-
-      /* Orientation matrix: maps R/P/S -> scanner XYZ */
-      /*const double (*M)[3] = PVM_SPackArrGradOrient[0];*/
-	  const double (*M)[3] = (const double (*)[3]) PVM_SPackArrGradOrient[0];
-
-      /* Precompute transpose if we need XYZ->RPS */
-      double MT[3][3];
-      if (PVM_DirsAreScannerXYZ == Yes) {
-          /* transpose: MT = Mᵀ */
-          for (int r = 0; r < 3; r++)
-              for (int c = 0; c < 3; c++)
-                  MT[r][c] = M[c][r];
-      }
-
-      for (int i = 0; i < use; i++) {
-
-          double dx = PVM_Dirs[i][0];
-          double dy = PVM_Dirs[i][1];
-          double dz = PVM_Dirs[i][2];
-
-          double r=dx, p=dy, s=dz; /* assume already R/P/S */
-
-          if (PVM_DirsAreScannerXYZ == Yes) {
-              /* convert scanner XYZ -> R/P/S via Mᵀ */
-              r = MT[0][0]*dx + MT[0][1]*dy + MT[0][2]*dz;
-              p = MT[1][0]*dx + MT[1][1]*dy + MT[1][2]*dz;
-              s = MT[2][0]*dx + MT[2][1]*dy + MT[2][2]*dz;
-          }
-
-          /* Normalize for safety (unit vector) */
-          double m = sqrt(r*r + p*p + s*s);
-          if (m > 0.0) { r/=m; p/=m; s/=m; }
-
-          /* These arrays control spoke orientation for the PPG */
-          GradAmpR[i] = r;
-          GradAmpP[i] = p;
-          GradAmpS[i] = s;
-      }
-
-      /* Optional: handle leftover slots if file shorter than NPro */
-      for (int i = use; i < NPro; i++) {
-          GradAmpR[i] = 1.0;  /* or leave vendor defaults */
-          GradAmpP[i] = 0.0;
-          GradAmpS[i] = 0.0;
-      }
-
-      DB_MSG(("Applied %d external directions (%s frame)",
-              use,
-              (PVM_DirsAreScannerXYZ==Yes ? "scanner XYZ -> RPS" : "RPS direct")));
-
-  }
 
   DB_MSG(("<--SetPpgParameters"));
 }

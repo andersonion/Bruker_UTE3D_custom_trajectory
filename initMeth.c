@@ -75,12 +75,15 @@ void initMeth()
   GTB_GeoObjFreezePos2("PVM_SliceGeoObj", No);
   PTB_SetGeoObjShape("PVM_SliceGeoObj", Ellipsoid_In_GobjShape);
 
-  PVM_UseExternalDirs = No;
-  strcpy(PVM_DirFile, "");
-  PVM_DirsCount = 0;
-  PVM_DirsAreScannerXYZ = No;      /* default: file is already R/P/S */
-  PARX_change_dims("PVM_Dirs", 0, 3);
-
+  PVM_UseExternalDirs   = No;
+  PVM_DirsAreScannerXYZ = No;
+  PVM_DirFile[0]        = '\0';
+  PVM_DirsCount         = 0;
+  
+  /* keep dims >= 1×3; preload a harmless unit vector */
+  PARX_change_dims("PVM_Dirs", 1, 3);
+  PVM_Dirs[0][0] = 1.0;  PVM_Dirs[0][1] = 0.0;  PVM_Dirs[0][2] = 0.0;
+  
   /* not a csi experiment */
   PTB_SetSpectrocopyDims( 0, 0 );
 

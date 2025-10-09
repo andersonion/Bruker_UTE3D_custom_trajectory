@@ -148,18 +148,12 @@ double parameter
 
 double parameter SpoilDur;
 
-/* --- user-facing --- */
-YesNo  PVM_UseExternalDirs;        /* No = built-in UTE, Yes = use file */
-char   PVM_DirFile[256];           /* path or filename in scan folder   */
-
-/* --- internal storage --- */
-int    PVM_DirsCount;              /* number of spokes in file          */
-/* dynamic 2D array; size set at runtime via PARX_change_dims() */
-double PVM_Dirs[1][3];             /* [N x 3] unit vectors (dx,dy,dz)   */
-
-/* Are directions in scanner XYZ? (otherwise assume R/P/S) */
-YesNo PVM_DirsAreScannerXYZ;
-
+parameter YesNo  PVM_UseExternalDirs;
+parameter YesNo  PVM_DirsAreScannerXYZ;
+parameter char   PVM_DirFile[256];
+parameter int    PVM_DirsCount;
+/* IMPORTANT: default dims must be nonzero */
+parameter double PVM_Dirs[1][3];
 
 /****************************************************************/
 /*	E N D   O F   F I L E					*/
