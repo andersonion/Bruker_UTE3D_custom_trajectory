@@ -125,41 +125,51 @@ void SetBaseLevelParam()
   }
 
   /* refresh list and sync selection text */
-  int n_list = refresh_dir_list_(PVM_DirSearchRoot);
+	int n_list = refresh_dir_list_(PVM_DirSearchRoot);
+	/* clamp index and sync Selected File text */
+	if (n_list <= 0) {
+		PVM_DirFileIdx = 0;
+		strcpy(PVM_DirFile, "<none>");
+	} else {
+		if (PVM_DirFileIdx < 0)           PVM_DirFileIdx = 0;
+		if (PVM_DirFileIdx >= n_list)     PVM_DirFileIdx = n_list - 1;
+		strcpy(PVM_DirFile, PVM_DirFileList[PVM_DirFileIdx]);
+	}
+
   DB_MSG(("External dir list: %d entries from %s", n_list, PVM_DirSearchRoot));
 
   /* load selected file if enabled & valid */
-  if (PVM_UseExternalDirs == Yes &&
-      n_list > 0 &&
-      strcmp(PVM_DirFile, "<none>") != 0 &&
-      PVM_DirFile[0] != '\0') {
+	if (PVM_UseExternalDirs == Yes &&
+		n_list > 0 &&
+		strcmp(PVM_DirFile, "<none>") != 0 &&
+		PVM_DirFile[0] != '\0')
+	{
+		char path[1024];
+		snprintf(path, sizeof(path), "%s/%s", PVM_DirSearchRoot, PVM_DirFile);
+	
+		double* tmp=NULL; int n=0;
+		int rc = LoadDirFile_(path, &tmp, &n);
+		if (rc==0 && n>0) {
+			PARX_change_dims("PVM_Dirs", n, 3);
+			for (int i=0;i<n;i++) {
+				PVM_Dirs[i][0]=tmp[3*i+0];
+				PVM_Dirs[i][1]=tmp[3*i+1];
+				PVM_Dirs[i][2]=tmp[3*i+2];
+			}
+			PVM_DirsCount = n;
+		} else {
+			PARX_change_dims("PVM_Dirs", 1, 3);
+			PVM_Dirs[0][0]=1.0; PVM_Dirs[0][1]=0.0; PVM_Dirs[0][2]=0.0;
+			PVM_DirsCount = 0;
+			PVM_UseExternalDirs = No;  /* disable on failure */
+		}
+		if (tmp) free(tmp);
+	} else {
+		PARX_change_dims("PVM_Dirs", 1, 3);
+		PVM_Dirs[0][0]=1.0; PVM_Dirs[0][1]=0.0; PVM_Dirs[0][2]=0.0;
+		PVM_DirsCount = 0;
+	}
 
-      char path[1024];
-      snprintf(path, sizeof(path), "%s/%s", PVM_DirSearchRoot, PVM_DirFile);
-
-      double* tmp=NULL; int n=0;
-      int rc = LoadDirFile_(path, &tmp, &n);
-      if (rc==0 && n>0) {
-          PARX_change_dims("PVM_Dirs", n, 3);
-          for (int i=0;i<n;i++) {
-              PVM_Dirs[i][0]=tmp[3*i+0];
-              PVM_Dirs[i][1]=tmp[3*i+1];
-              PVM_Dirs[i][2]=tmp[3*i+2];
-          }
-          PVM_DirsCount = n;
-          DB_MSG(("Loaded %d directions from %s", n, path));
-      } else {
-          PARX_change_dims("PVM_Dirs", 1, 3);
-          PVM_Dirs[0][0]=1.0; PVM_Dirs[0][1]=0.0; PVM_Dirs[0][2]=0.0;
-          PVM_DirsCount = 0;  PVM_UseExternalDirs = No;
-          DB_MSG(("Failed to load directions from %s; fallback", path));
-      }
-      if (tmp) free(tmp);
-  } else {
-      PARX_change_dims("PVM_Dirs", 1, 3);
-      PVM_Dirs[0][0]=1.0; PVM_Dirs[0][1]=0.0; PVM_Dirs[0][2]=0.0;
-      PVM_DirsCount = 0;
-  }
 
 
   
