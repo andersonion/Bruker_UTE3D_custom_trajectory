@@ -16,9 +16,9 @@
 
 static const char resid[] = "$Id: backbone.c,v 1.24 2013/08/29 12:31:35 sako Exp $ (C) 2011 Bruker BioSpin MRI GmbH";
 
-#define DEBUG		0
-#define DB_MODULE	0
-#define DB_LINE_NR	0
+#define DEBUG		1
+#define DB_MODULE	1
+#define DB_LINE_NR	1
 
 #include "method.h"
 
