@@ -107,10 +107,10 @@ Description: Layout of routine parameter editor for method UTE3D.
 		  <column>
 			<parameter name="PVM_UseExternalDirs"   displayName="Use External Directions"/>
 			<parameter name="PVM_DirFileIdx"        displayName="File Index" widget="spinner"/>
-			<parameter name="PVM_DirFile"           displayName="Selected File" readonly="true"/>
+			<parameter name="PVM_DirFile"           displayName="Selected File"/>
 			<parameter name="PVM_DirsAreScannerXYZ" displayName="File in Scanner XYZ"/>
-			<parameter name="PVM_DirSearchRoot"     displayName="Search Folder" readonly="true"/>
-			<parameter name="PVM_DirsCount"         displayName="# Directions Loaded" readonly="true"/>
+			<parameter name="PVM_DirSearchRoot"     displayName="Search Folder"/>
+			<parameter name="PVM_DirsCount"         displayName="# Directions Loaded"/>
 		  </column>
 		  <column>
 			<textLine text="Folder: src/dirs next to this method (auto)."/>
