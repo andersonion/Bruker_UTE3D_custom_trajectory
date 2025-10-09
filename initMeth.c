@@ -77,13 +77,14 @@ void initMeth()
 
   PVM_UseExternalDirs   = No;
   PVM_DirsAreScannerXYZ = No;
-  PVM_DirFile[0]        = '\0';
-  PVM_DirsCount         = 0;
+  PARX_change_dims("PVM_DirFileList", 1, 256);
+  strcpy(PVM_DirFileList[0], "<none>");
+  strcpy(PVM_DirFile, PVM_DirFileList[0]);
   
   /* keep dims >= 1×3; preload a harmless unit vector */
   PARX_change_dims("PVM_Dirs", 1, 3);
   PVM_Dirs[0][0] = 1.0;  PVM_Dirs[0][1] = 0.0;  PVM_Dirs[0][2] = 0.0;
-  
+  PVM_DirsCount         = 0;
   /* not a csi experiment */
   PTB_SetSpectrocopyDims( 0, 0 );
 

@@ -41,6 +41,74 @@ fclose(dfp); \
 #include <math.h>
 #include "method.h"
 static int LoadDirFile_(const char* fname, double** buf_out, int* rows_out);
+#include <dirent.h>
+#include <sys/stat.h>
+
+/* Compute default search root = "<this file's dir>/dirs" */
+static void compute_default_search_root_(char* out, size_t n)
+{
+    const char* thisfile = __FILE__;               /* full path to BaseLevelRelations.c */
+    char tmp[512]; strncpy(tmp, thisfile, sizeof(tmp)-1); tmp[sizeof(tmp)-1]='\0';
+    char* slash = strrchr(tmp, '/'); if (slash) *slash = '\0';  /* strip filename */
+    /* tmp now = .../methods/src/qialUTE3D */
+    snprintf(out, n, "%s/dirs", tmp);
+}
+
+/* case-insensitive .txt check */
+static int has_txt_ext_(const char* name)
+{
+    size_t ln = strlen(name);
+    if (ln < 4) return 0;
+    const char* p = name + (ln - 4);
+    return ( (p[0]=='.') &&
+             (p[1]=='t' || p[1]=='T') &&
+             (p[2]=='x' || p[2]=='X') &&
+             (p[3]=='t' || p[3]=='T') );
+}
+
+/* Fill PVM_DirFileList from <root>/ *.txt; keep >=1 row always */
+static int refresh_dir_list_(const char* root)
+{
+    DIR* d = opendir(root);
+    if (!d) {
+        PARX_change_dims("PVM_DirFileList", 1, 256);
+        strcpy(PVM_DirFileList[0], "<none>");
+        if (strcmp(PVM_DirFile, PVM_DirFileList[0])!=0) strcpy(PVM_DirFile, PVM_DirFileList[0]);
+        return 0;
+    }
+    char **names = NULL; int cap=16, n=0;
+    names = (char**)malloc(cap*sizeof(char*));
+
+    struct dirent* e;
+    while ((e = readdir(d)) != NULL) {
+        if (e->d_name[0]=='.') continue;
+        if (!has_txt_ext_(e->d_name)) continue;
+        if (n>=cap) { cap*=2; names=(char**)realloc(names, cap*sizeof(char*)); }
+        names[n] = (char*)malloc(256);
+        strncpy(names[n], e->d_name, 255); names[n][255]='\0';
+        n++;
+    }
+    closedir(d);
+
+    if (n==0) {
+        PARX_change_dims("PVM_DirFileList", 1, 256);
+        strcpy(PVM_DirFileList[0], "<none>");
+        if (strcmp(PVM_DirFile, PVM_DirFileList[0])!=0) strcpy(PVM_DirFile, PVM_DirFileList[0]);
+        free(names);
+        return 0;
+    }
+
+    PARX_change_dims("PVM_DirFileList", n, 256);
+    for (int i=0;i<n;i++) { strncpy(PVM_DirFileList[i], names[i], 255); PVM_DirFileList[i][255]='\0'; free(names[i]); }
+    free(names);
+
+    /* keep selection if possible */
+    int found=0; for (int i=0;i<n;i++) if (0==strcmp(PVM_DirFile, PVM_DirFileList[i])) { found=1; break; }
+    if (!found) strcpy(PVM_DirFile, PVM_DirFileList[0]);
+
+    return n;
+}
+
 
 void SetBaseLevelParam()
 {
@@ -54,37 +122,51 @@ void SetBaseLevelParam()
   
   SetGradientParameters();
   
-	/* load external directions BEFORE SetPpgParameters() */
-	if (PVM_UseExternalDirs == Yes && PVM_DirFile[0] != '\0') {
-	
-		double* tmp = NULL; int n = 0;
-		int rc = LoadDirFile_(PVM_DirFile, &tmp, &n);
-	
-		if (rc == 0 && n > 0) {
-			PARX_change_dims("PVM_Dirs", n, 3);
-			for (int i = 0; i < n; i++) {
-				PVM_Dirs[i][0] = tmp[3*i+0];
-				PVM_Dirs[i][1] = tmp[3*i+1];
-				PVM_Dirs[i][2] = tmp[3*i+2];
-			}
-			PVM_DirsCount = n;
-			DB_MSG(("Loaded %d external directions from %s", n, PVM_DirFile));
-		} else {
-			/* fallback: keep dims at 1×3; do NOT set to 0×3 */
-			PARX_change_dims("PVM_Dirs", 1, 3);
-			PVM_Dirs[0][0] = 1.0; PVM_Dirs[0][1] = 0.0; PVM_Dirs[0][2] = 0.0;
-			PVM_DirsCount  = 0;
-			PVM_UseExternalDirs = No;
-			DB_MSG(("External dir load FAILED; using built-in projections"));
-		}
-		if (tmp) free(tmp);
-	
-	} else {
-		/* not using externals: keep 1×3 placeholder; count=0 */
-		PARX_change_dims("PVM_Dirs", 1, 3);
-		PVM_Dirs[0][0] = 1.0; PVM_Dirs[0][1] = 0.0; PVM_Dirs[0][2] = 0.0;
-		PVM_DirsCount  = 0;
-	}
+  /* --- auto root: src/dirs next to this C file --- */
+  char autoRoot[512];
+  compute_default_search_root_(autoRoot, sizeof(autoRoot));
+
+  /* If user left PVM_DirSearchRoot empty, fill it with autoRoot */
+  if (PVM_DirSearchRoot[0] == '\0') {
+      strncpy(PVM_DirSearchRoot, autoRoot, sizeof(PVM_DirSearchRoot)-1);
+      PVM_DirSearchRoot[sizeof(PVM_DirSearchRoot)-1] = '\0';
+  }
+
+  /* Build dropdown from root */
+  int n_list = refresh_dir_list_(PVM_DirSearchRoot);
+  DB_MSG(("Dir list: %d entries from %s", n_list, PVM_DirSearchRoot));
+
+  /* Load selected file (filename only) if enabled */
+  if (PVM_UseExternalDirs == Yes &&
+      strcmp(PVM_DirFile, "<none>") != 0 &&
+      PVM_DirFile[0] != '\0')
+  {
+      char path[1024];
+      snprintf(path, sizeof(path), "%s/%s", PVM_DirSearchRoot, PVM_DirFile);
+
+      double* tmp=NULL; int n=0;
+      int rc = LoadDirFile_(path, &tmp, &n);
+      if (rc==0 && n>0) {
+          PARX_change_dims("PVM_Dirs", n, 3);
+          for (int i=0;i<n;i++) {
+              PVM_Dirs[i][0]=tmp[3*i+0];
+              PVM_Dirs[i][1]=tmp[3*i+1];
+              PVM_Dirs[i][2]=tmp[3*i+2];
+          }
+          PVM_DirsCount = n;
+          DB_MSG(("Loaded %d directions from %s", n, path));
+      } else {
+          PARX_change_dims("PVM_Dirs", 1, 3);
+          PVM_Dirs[0][0]=1.0; PVM_Dirs[0][1]=0.0; PVM_Dirs[0][2]=0.0;
+          PVM_DirsCount = 0;  PVM_UseExternalDirs = No;
+          DB_MSG(("Failed to load directions from %s; fallback", path));
+      }
+      if (tmp) free(tmp);
+  } else {
+      PARX_change_dims("PVM_Dirs", 1, 3);
+      PVM_Dirs[0][0]=1.0; PVM_Dirs[0][1]=0.0; PVM_Dirs[0][2]=0.0;
+      PVM_DirsCount = 0;
+  }
 
   
   
