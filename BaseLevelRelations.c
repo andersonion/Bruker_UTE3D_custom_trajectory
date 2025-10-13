@@ -127,10 +127,10 @@ void SetBaseLevelParam()
   /* --- auto-detect src/dirs --- */
   char autoRoot[512];
   compute_default_search_root_(autoRoot, sizeof(autoRoot));
-  if (PVM_DirSearchRoot[0]=='\0') {
+  /*if (PVM_DirSearchRoot[0]=='\0') {
       strncpy(PVM_DirSearchRoot, autoRoot, sizeof(PVM_DirSearchRoot)-1);
       PVM_DirSearchRoot[sizeof(PVM_DirSearchRoot)-1]='\0';
-  }
+  }*/
 
   /* refresh list and sync selection text */
 	int n_list = refresh_dir_list_(PVM_DirSearchRoot);
