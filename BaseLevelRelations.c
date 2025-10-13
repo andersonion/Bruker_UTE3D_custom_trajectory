@@ -131,7 +131,7 @@ void SetBaseLevelParam()
       strncpy(PVM_DirSearchRoot, autoRoot, sizeof(PVM_DirSearchRoot)-1);
       PVM_DirSearchRoot[sizeof(PVM_DirSearchRoot)-1]='\0';
   }*/
-
+  DB_MSG(("External dir: %s", PVM_DirSearchRoot)); 
   /* refresh list and sync selection text */
 	int n_list = refresh_dir_list_(PVM_DirSearchRoot);
 	if (n_list <= 0) { PVM_DirFileIdx = 0; strcpy(PVM_DirFile, "<none>"); }
