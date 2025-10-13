@@ -56,7 +56,9 @@ static void compute_default_search_root_(char* out, size_t n) {
     snprintf(out, n, "%s/dirs", tmp);*/
     char pcd[] = __FILE__;
     int len = strlen(pcd);
-    pcd[len-20]='\0';
+    
+    /*pcd[len-20]='\0';*/
+    pcd[len-1]='\0';
     snprintf(out, n, "%s/dirs", pcd);
 }
 
