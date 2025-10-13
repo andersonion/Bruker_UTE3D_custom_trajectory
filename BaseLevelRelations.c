@@ -126,13 +126,13 @@ void SetBaseLevelParam()
   
   /* --- auto-detect src/dirs --- */
   char autoRoot[512];
-  DB_MSG(("External dir: %s", PVM_DirSearchRoot)); 
   compute_default_search_root_(autoRoot, sizeof(autoRoot));
   DB_MSG(("External dir candidate: %s", autoRoot)); 
-  /*if (PVM_DirSearchRoot[0]=='\0') {
+  if (PVM_DirSearchRoot[0]=='\0') {
       strncpy(PVM_DirSearchRoot, autoRoot, sizeof(PVM_DirSearchRoot)-1);
       PVM_DirSearchRoot[sizeof(PVM_DirSearchRoot)-1]='\0';
-  }*/
+      DB_MSG(("External dir 2: %s", PVM_DirSearchRoot)); 
+  }
   DB_MSG(("External dir: %s", PVM_DirSearchRoot)); 
   /* refresh list and sync selection text */
 	int n_list = refresh_dir_list_(PVM_DirSearchRoot);
