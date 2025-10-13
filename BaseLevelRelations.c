@@ -129,6 +129,13 @@ void SetBaseLevelParam()
   compute_default_search_root_(autoRoot, sizeof(autoRoot));
   DB_MSG(("External dir candidate: %s", autoRoot)); 
   if (PVM_DirSearchRoot[0]=='\0') {
+  	DB_MSG(("sizes: sizeof(PVM_DirSearchRoot)=%zu, strlen(autoRoot)=%zu",
+        (size_t)sizeof(PVM_DirSearchRoot),
+        autoRoot ? strlen(autoRoot) : (size_t)0));
+
+	DB_MSG(("ptrs: dest=%p src=%p", (void*)PVM_DirSearchRoot, (void*)autoRoot));
+	DB_MSG(("autoRoot preview: '%.64s'", autoRoot ? autoRoot : "(null)"));
+
       strncpy(PVM_DirSearchRoot, autoRoot, sizeof(PVM_DirSearchRoot)-1);
       PVM_DirSearchRoot[sizeof(PVM_DirSearchRoot)-1]='\0';
       DB_MSG(("External dir 2: %s", PVM_DirSearchRoot)); 
