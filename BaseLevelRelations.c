@@ -50,14 +50,14 @@ static int LoadDirFile_(const char* fname, double** buf_out, int* rows_out); /* 
 
 /* default root = "<this file's dir>/dirs" */
 static void compute_default_search_root_(char* out, size_t n) {
-    /*const char* thisfile = __FILE__;
+    const char* thisfile = __FILE__;
     char tmp[512]; strncpy(tmp, thisfile, sizeof(tmp)-1); tmp[sizeof(tmp)-1]='\0';
     char* slash = strrchr(tmp, '/'); if (slash) *slash = '\0';
-    snprintf(out, n, "%s/dirs", tmp);*/
-    char pcd[] = __FILE__;
+    snprintf(out, n, "%s/dirs", tmp);
+    /*char pcd[] = __FILE__;
     int len = strlen(pcd);
     pcd[len-21]='\0';
-    snprintf(out, n, "%s/dirs", pcd);
+    snprintf(out, n, "%s/dirs", pcd);*/
 }
 
 static int has_txt_ext_(const char* name) {
