@@ -128,6 +128,7 @@ void SetBaseLevelParam()
   char autoRoot[512];
   DB_MSG(("External dir: %s", PVM_DirSearchRoot)); 
   compute_default_search_root_(autoRoot, sizeof(autoRoot));
+  DB_MSG(("External dir candidate: %s", autoRoot)); 
   /*if (PVM_DirSearchRoot[0]=='\0') {
       strncpy(PVM_DirSearchRoot, autoRoot, sizeof(PVM_DirSearchRoot)-1);
       PVM_DirSearchRoot[sizeof(PVM_DirSearchRoot)-1]='\0';
