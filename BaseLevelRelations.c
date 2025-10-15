@@ -127,8 +127,12 @@ void SetBaseLevelParam()
   /* --- auto-detect src/dirs --- */
   char autoRoot[512];
   compute_default_search_root_(autoRoot, sizeof(autoRoot));
-  DB_MSG(("External dir candidate: %s", autoRoot)); 
-  if (PVM_DirSearchRoot[0]=='\0') {
+  DB_MSG(("External dir candidate: %s", autoRoot));
+  if (PVM_DirSearchRoot[0] == '\0') {
+    (void)snprintf(PVM_DirSearchRoot, sizeof PVM_DirSearchRoot, "%s", autoRoot);
+  }
+
+  /*if (PVM_DirSearchRoot[0]=='\0') {
 	size_t need = strlen(autoRoot) + 1;          // include NUL
 	PARX_change_dims("PVM_DirSearchRoot", need); // grow the Parx string param
 	// Now it has capacity >= need
@@ -139,7 +143,7 @@ void SetBaseLevelParam()
       strncpy(PVM_DirSearchRoot, autoRoot, sizeof(PVM_DirSearchRoot)-1);
       PVM_DirSearchRoot[sizeof(PVM_DirSearchRoot)-1]='\0';
       DB_MSG(("External dir 2: %s", PVM_DirSearchRoot)); 
-  }
+  }*/
   DB_MSG(("External dir: %s", PVM_DirSearchRoot)); 
   /* refresh list and sync selection text */
 	int n_list = refresh_dir_list_(PVM_DirSearchRoot);
