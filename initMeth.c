@@ -31,6 +31,17 @@ static void compute_default_search_root_init_(char* out, size_t n)
     snprintf(out, n, "%s/dirs", tmp);                /* -> …/src/qialUTE3D/dirs */
 }
 
+static void compute_default_search_root_(char* out, size_t n) {
+    const char* thisfile = __FILE__;
+    char tmp[512]; strncpy(tmp, thisfile, sizeof(tmp)-1); tmp[sizeof(tmp)-1]='\0';
+    char* slash = strrchr(tmp, '/'); if (slash) *slash = '\0';
+    snprintf(out, n, "%s/dirs", tmp);
+    /*char pcd[] = __FILE__;
+    int len = strlen(pcd);
+    pcd[len-21]='\0';
+    snprintf(out, n, "%s/dirs", pcd);*/
+}
+
 void initMeth()
 /*:=MPE=:=======================================================*/
 {

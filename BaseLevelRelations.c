@@ -54,10 +54,6 @@ static void compute_default_search_root_(char* out, size_t n) {
     char tmp[512]; strncpy(tmp, thisfile, sizeof(tmp)-1); tmp[sizeof(tmp)-1]='\0';
     char* slash = strrchr(tmp, '/'); if (slash) *slash = '\0';
     snprintf(out, n, "%s/dirs", tmp);
-    /*char pcd[] = __FILE__;
-    int len = strlen(pcd);
-    pcd[len-21]='\0';
-    snprintf(out, n, "%s/dirs", pcd);*/
 }
 
 static int has_txt_ext_(const char* name) {
